@@ -150,3 +150,60 @@ header {
     align-items: center;
   }
 }
+
+/* Hand Tracking UI Styles */
+.hand-tracking-ui {
+  user-select: none;
+}
+
+.hand-tracking-toggle:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  transform: scale(1.05);
+}
+
+.hand-tracking-toggle:active {
+  transform: scale(0.95);
+}
+
+.hand-tracking-status {
+  transition: background-color 0.3s ease;
+}
+
+.hand-tracking-preview {
+  transition: opacity 0.3s ease;
+}
+
+.hand-tracking-preview video {
+  filter: brightness(0.9) contrast(1.1);
+}
+
+/* Virtual Cursor Styles */
+.virtual-cursor {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Responsive adjustments for hand tracking UI */
+@media screen and (max-width: 768px) {
+  .hand-tracking-ui {
+    bottom: 10px !important;
+    right: 10px !important;
+  }
+
+  .hand-tracking-preview {
+    width: 150px !important;
+    height: 112px !important;
+  }
+
+  .hand-tracking-toggle {
+    padding: 8px 16px !important;
+    font-size: 11px !important;
+  }
+
+  .hand-tracking-status {
+    font-size: 10px !important;
+    padding: 6px 10px !important;
+    min-width: 120px !important;
+  }
+}

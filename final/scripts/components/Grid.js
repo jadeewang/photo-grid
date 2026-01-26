@@ -1,6 +1,7 @@
 import { Card } from './Card';
 import { ExtendedObject3D } from "../utils/ExtendedObject3D";
 import { Vector2 } from 'three';
+import { HandTrackingManager } from '../managers/HandTrackingManager';
 
 export class Grid extends ExtendedObject3D {
   static COLUMNS = Math.floor(window.innerWidth / 100) | 1;
@@ -8,6 +9,7 @@ export class Grid extends ExtendedObject3D {
 
   static MousePosition = new Vector2();
   #_targetMousePosition = new Vector2();
+  #_isUsingHandTracking = false;
 
   constructor() {
     super();
@@ -15,11 +17,26 @@ export class Grid extends ExtendedObject3D {
     Card.SetScale();
     this.#_createCards();
     this.#_setListeners();
+    this.#_setupHandTracking();
   }
 
   #_setListeners() {
     window.addEventListener('mousemove', this.#_updateMousePos)
     window.addEventListener('touchmove', this.#_updateMousePos)
+  }
+
+  #_setupHandTracking() {
+    // Subscribe to hand tracking updates
+    HandTrackingManager.OnFingerMove((position, isDetected) => {
+      if (isDetected && HandTrackingManager.IsActive()) {
+        // Convert finger position to NDC coordinates for Three.js
+        const ndcPos = HandTrackingManager.GetFingerPositionNDC();
+        this.#_targetMousePosition.set(ndcPos.x, ndcPos.y);
+        this.#_isUsingHandTracking = true;
+      } else {
+        this.#_isUsingHandTracking = false;
+      }
+    });
   }
 
   #_createCards() {
@@ -32,6 +49,11 @@ export class Grid extends ExtendedObject3D {
   }
 
   #_updateMousePos = (event) => {
+    // Only update from mouse if hand tracking is not active
+    if (HandTrackingManager.IsHandDetected() && HandTrackingManager.IsActive()) {
+      return;
+    }
+
     const isMobile = event.type === 'touchmove';
     
     const { clientX, clientY } = isMobile ? event.changedTouches[0] : event;
@@ -44,6 +66,7 @@ export class Grid extends ExtendedObject3D {
     const y = -(clientY - halfH) / window.innerHeight * 2
 
     this.#_targetMousePosition.set(x, y)
+    this.#_isUsingHandTracking = false;
   }
 
   resize() {

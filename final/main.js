@@ -5,33 +5,70 @@ import { AssetsManager } from "./scripts/managers/AssetsManager";
 import { Grid } from "./scripts/components/Grid";
 import { MainThree } from "./scripts/MainThree";
 import { Ticker } from "./scripts/utils/Ticker";
+import { HandTrackingUI } from "./scripts/components/HandTrackingUI";
+import { HandTrackingManager } from "./scripts/managers/HandTrackingManager";
+import { VirtualCursor } from "./scripts/components/VirtualCursor";
 
 export class Main {
+  static #_handTrackingUI = null;
+  static #_virtualCursor = null;
+
   static async Init() {
     MainThree.Init();
     Ticker.Start();
 
     await this.#_LoadAssets();
     this.#_CreateScene();
+    this.#_InitHandTracking();
   }
 
   static async #_LoadAssets() {
+    // To use your own photos:
+    // 1. Place your image files in the public/textures/ folder
+    // 2. Supported formats: .jpg, .jpeg, .png, .webp
+    // 3. Update the paths below to match your image filenames
+    // 4. You can use any number of images (1-10 or more)
+    
     AssetsManager.AddTexture(AssetsId.TEXTURE_1, "textures/img1.webp");
     AssetsManager.AddTexture(AssetsId.TEXTURE_2, "textures/img2.webp");
     AssetsManager.AddTexture(AssetsId.TEXTURE_3, "textures/img3.webp");
     AssetsManager.AddTexture(AssetsId.TEXTURE_4, "textures/img4.webp");
     AssetsManager.AddTexture(AssetsId.TEXTURE_5, "textures/img5.webp");
     AssetsManager.AddTexture(AssetsId.TEXTURE_6, "textures/img6.webp");
-    AssetsManager.AddTexture(AssetsId.TEXTURE_7, "textures/img7.webp");
-    AssetsManager.AddTexture(AssetsId.TEXTURE_8, "textures/img8.webp");
-    AssetsManager.AddTexture(AssetsId.TEXTURE_9, "textures/img9.webp");
-    AssetsManager.AddTexture(AssetsId.TEXTURE_10, "textures/img10.webp");
+    //AssetsManager.AddTexture(AssetsId.TEXTURE_7, "textures/img7.webp");
+    //AssetsManager.AddTexture(AssetsId.TEXTURE_8, "textures/img8.webp");
+    //AssetsManager.AddTexture(AssetsId.TEXTURE_9, "textures/img9.webp");
+    //AssetsManager.AddTexture(AssetsId.TEXTURE_10, "textures/img10.webp");
 
     await AssetsManager.Load();
   }
 
   static #_CreateScene() {
     MainThree.Add(new Grid());
+  }
+
+  static #_InitHandTracking() {
+    // Create hand tracking UI (includes video element)
+    this.#_handTrackingUI = new HandTrackingUI();
+    
+    // Create virtual cursor for visual feedback
+    this.#_virtualCursor = new VirtualCursor();
+
+    // Subscribe to hand tracking updates to update virtual cursor
+    HandTrackingManager.OnFingerMove((position, isDetected) => {
+      if (isDetected && HandTrackingManager.IsActive()) {
+        this.#_virtualCursor.update(position.x, position.y);
+      } else {
+        this.#_virtualCursor.hide();
+      }
+    });
+
+    // Auto-enable if previously enabled (from localStorage)
+    if (this.#_handTrackingUI.isEnabled()) {
+      this.#_handTrackingUI.enable().catch((error) => {
+        console.warn("Could not auto-enable hand tracking:", error);
+      });
+    }
   }
 }
 
