@@ -148,17 +148,99 @@ export class HandTrackingOverlay {
     // Clear canvas
     this.#_ctx.clearRect(0, 0, this.#_canvas.width, this.#_canvas.height);
 
-    if (!this.#_isVisible) {
-      return;
+    // Always draw grid lines when hand tracking is active
+    if (HandTrackingManager.IsActive()) {
+      // Pass hand center position if available
+      const handCenter = this.#_getHandCenter();
+      this.#_drawGridLines(handCenter);
     }
 
-    // Draw skeleton on video
-    if (this.#_currentLandmarks) {
+    // Draw skeleton on video when hand is detected
+    if (this.#_isVisible && this.#_currentLandmarks) {
       this.#_drawSkeleton();
     }
 
     // Particles are drawn on the main screen (not on video)
     // They're handled separately if needed
+  }
+
+  #_getHandCenter() {
+    if (!this.#_currentLandmarks || this.#_currentLandmarks.length === 0) {
+      return null;
+    }
+
+    if (!this.#_videoContainer) return null;
+
+    const rect = this.#_videoContainer.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+
+    // Use wrist (landmark 0) as the hand center reference
+    const wrist = this.#_currentLandmarks[0];
+    // Flip X because video is mirrored
+    const x = (1 - wrist.x) * width;
+    const y = wrist.y * height;
+
+    return { x, y };
+  }
+
+  #_drawGridLines(handCenter = null) {
+    const ctx = this.#_ctx;
+
+    if (!this.#_videoContainer) return;
+
+    const rect = this.#_videoContainer.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+
+    // Determine grid center - use hand center if available, otherwise use screen center
+    const centerX = handCenter ? handCenter.x : width / 2;
+    const centerY = handCenter ? handCenter.y : height / 2;
+
+    // Draw grid lines
+    ctx.strokeStyle = "#0080ff"; // Blue color similar to reference
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+
+    // Draw vertical center line (dividing left and right zones) - follows hand or centered
+    ctx.beginPath();
+    ctx.moveTo(centerX, 0);
+    ctx.lineTo(centerX, height);
+    ctx.stroke();
+
+    // Draw horizontal center line for better grid visualization - follows hand or centered
+    ctx.beginPath();
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(width, centerY);
+    ctx.stroke();
+
+    // Draw quarter lines for finer grid (lighter opacity)
+    ctx.globalAlpha = 0.4; // More transparent for quarter lines
+    ctx.lineWidth = 1;
+    
+    // Calculate quarter offsets from center
+    const quarterOffsetX = width / 4;
+    const quarterOffsetY = height / 4;
+    
+    // Vertical quarter lines (relative to hand center)
+    ctx.beginPath();
+    ctx.moveTo(centerX - quarterOffsetX, 0);
+    ctx.lineTo(centerX - quarterOffsetX, height);
+    ctx.moveTo(centerX + quarterOffsetX, 0);
+    ctx.lineTo(centerX + quarterOffsetX, height);
+    ctx.stroke();
+
+    // Horizontal quarter lines (relative to hand center)
+    ctx.beginPath();
+    ctx.moveTo(0, centerY - quarterOffsetY);
+    ctx.lineTo(width, centerY - quarterOffsetY);
+    ctx.moveTo(0, centerY + quarterOffsetY);
+    ctx.lineTo(width, centerY + quarterOffsetY);
+    ctx.stroke();
+
+    // Reset alpha and line width for other drawings
+    ctx.globalAlpha = 1.0;
+    ctx.lineWidth = 2;
   }
 
   #_drawSkeleton() {

@@ -12,6 +12,8 @@ export class HandTrackingUI {
   #_previewContainer = null;
   #_isEnabled = false;
   #_showPreview = true;
+  #_virtualCursorPosition = { x: -1, y: -1 };
+  #_opacityCheckInterval = null;
 
   constructor() {
     this.#_loadPreferences();
@@ -62,7 +64,7 @@ export class HandTrackingUI {
     // Create toggle button
     this.#_toggleButton = document.createElement("button");
     this.#_toggleButton.className = "hand-tracking-toggle";
-    this.#_toggleButton.textContent = "Enable Hand Tracking";
+    this.#_toggleButton.textContent = "turn on magic mode :)";
     this.#_toggleButton.style.cssText = `
       padding: 10px 20px;
       background: rgba(0, 0, 0, 0.7);
@@ -72,7 +74,8 @@ export class HandTrackingUI {
       cursor: pointer;
       font-family: ui-monospace, monospace;
       font-size: 12px;
-      transition: all 0.3s ease;
+      transition: all 0.3s ease, opacity 0.3s ease;
+      opacity: 1;
     `;
 
     // Create status indicator
@@ -88,6 +91,8 @@ export class HandTrackingUI {
       font-size: 11px;
       min-width: 150px;
       text-align: center;
+      transition: background-color 0.3s ease, opacity 0.3s ease;
+      opacity: 1;
     `;
 
     // Create video preview container
@@ -102,6 +107,8 @@ export class HandTrackingUI {
       overflow: hidden;
       border: 2px solid rgba(255, 255, 255, 0.3);
       display: ${this.#_showPreview ? "block" : "none"};
+      opacity: 0.95;
+      transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
     `;
 
     // Create video element
@@ -123,6 +130,14 @@ export class HandTrackingUI {
 
     // Update initial state
     this.#_updateUI();
+    
+    // If initially disabled, collapse the video player
+    if (!this.#_isEnabled) {
+      this.#_collapseVideoPlayer();
+    } else {
+      // If initially enabled, start opacity tracking
+      this.#_startOpacityTracking();
+    }
   }
 
   #_setupEventListeners() {
@@ -133,6 +148,8 @@ export class HandTrackingUI {
     // Listen for hand detection changes
     HandTrackingManager.OnFingerMove((position, isDetected) => {
       this.#_updateStatus(isDetected);
+      // Track virtual cursor position (tracked cursor from hand tracking)
+      this.#_virtualCursorPosition = { x: position.x, y: position.y };
     });
   }
 
@@ -140,26 +157,130 @@ export class HandTrackingUI {
     if (!this.#_isEnabled) return;
 
     if (isHandDetected) {
-      this.#_statusIndicator.textContent = "Hand detected ✓";
+      this.#_statusIndicator.textContent = "hand detected ✓";
       this.#_statusIndicator.style.background = "rgba(0, 255, 0, 0.3)";
     } else {
-      this.#_statusIndicator.textContent = "No hand detected";
+      this.#_statusIndicator.textContent = "no hand detected";
       this.#_statusIndicator.style.background = "rgba(255, 0, 0, 0.3)";
     }
   }
 
   #_updateUI() {
     if (this.#_isEnabled) {
-      this.#_toggleButton.textContent = "Disable Hand Tracking";
+      this.#_toggleButton.textContent = "turn off magic mode :(";
       this.#_toggleButton.style.background = "rgba(255, 0, 0, 0.7)";
-      this.#_statusIndicator.textContent = "Initializing...";
+      this.#_statusIndicator.textContent = "one sec...";
       this.#_statusIndicator.style.background = "rgba(255, 255, 0, 0.3)";
+      // Set buttons to 50% opacity
+      if (this.#_toggleButton) {
+        this.#_toggleButton.style.opacity = "0.5";
+      }
+      if (this.#_statusIndicator) {
+        this.#_statusIndicator.style.opacity = "0.5";
+      }
+      // Show and set opacity for video player
+      this.#_showVideoPlayer();
+      this.#_setOpacity(0.95);
     } else {
-      this.#_toggleButton.textContent = "Enable Hand Tracking";
+      this.#_toggleButton.textContent = "turn on magic mode :)";
       this.#_toggleButton.style.background = "rgba(0, 0, 0, 0.7)";
-      this.#_statusIndicator.textContent = "Hand tracking off";
+      this.#_statusIndicator.textContent = "hand tracking off";
       this.#_statusIndicator.style.background = "rgba(0, 0, 0, 0.5)";
+      // Reset opacity to full for buttons when disabled
+      if (this.#_toggleButton) {
+        this.#_toggleButton.style.opacity = "1.0";
+      }
+      if (this.#_statusIndicator) {
+        this.#_statusIndicator.style.opacity = "1.0";
+      }
+      // Collapse video player
+      this.#_collapseVideoPlayer();
     }
+  }
+
+  #_showVideoPlayer() {
+    if (this.#_previewContainer) {
+      // Only show if preview is enabled
+      if (this.#_showPreview) {
+        this.#_previewContainer.style.display = "block";
+        this.#_previewContainer.style.height = "150px";
+        this.#_previewContainer.style.margin = "0";
+      } else {
+        this.#_previewContainer.style.display = "none";
+      }
+    }
+  }
+
+  #_collapseVideoPlayer() {
+    if (this.#_previewContainer) {
+      this.#_previewContainer.style.height = "0";
+      this.#_previewContainer.style.margin = "0";
+      this.#_previewContainer.style.overflow = "hidden";
+      // Hide after transition completes
+      setTimeout(() => {
+        if (!this.#_isEnabled && this.#_previewContainer) {
+          this.#_previewContainer.style.display = "none";
+        }
+      }, 300);
+    }
+  }
+
+  #_setOpacity(opacity) {
+    // Apply opacity to video player only
+    if (this.#_previewContainer) {
+      this.#_previewContainer.style.opacity = opacity.toString();
+    }
+    // Buttons always stay at 50% opacity when enabled
+    if (this.#_isEnabled) {
+      if (this.#_toggleButton) {
+        this.#_toggleButton.style.opacity = "0.5";
+      }
+      if (this.#_statusIndicator) {
+        this.#_statusIndicator.style.opacity = "0.5";
+      }
+    }
+  }
+
+  #_startOpacityTracking() {
+    // Check cursor position periodically
+    this.#_opacityCheckInterval = setInterval(() => {
+      if (!this.#_isEnabled || !this.#_previewContainer) {
+        return;
+      }
+
+      // Only track opacity if video player is visible
+      const isVisible = this.#_previewContainer.style.display !== "none" && 
+                        this.#_previewContainer.offsetHeight > 0;
+      if (!isVisible) {
+        return;
+      }
+
+      const rect = this.#_previewContainer.getBoundingClientRect();
+      // Only check virtual cursor (tracked cursor), not mouse
+      const isTrackedCursorOver = this.#_isPointInRect(this.#_virtualCursorPosition, rect);
+
+      // Fade to 30% when tracked cursor is over, otherwise 95%
+      this.#_setOpacity(isTrackedCursorOver ? 0.3 : 0.95);
+    }, 50); // Check every 50ms for smooth transitions
+  }
+
+  #_stopOpacityTracking() {
+    if (this.#_opacityCheckInterval) {
+      clearInterval(this.#_opacityCheckInterval);
+      this.#_opacityCheckInterval = null;
+    }
+  }
+
+  #_isPointInRect(point, rect) {
+    if (!point || point.x < 0 || point.y < 0) {
+      return false;
+    }
+    return (
+      point.x >= rect.left &&
+      point.x <= rect.right &&
+      point.y >= rect.top &&
+      point.y <= rect.bottom
+    );
   }
 
   /**
@@ -187,6 +308,7 @@ export class HandTrackingUI {
       this.#_isEnabled = true;
       this.#_savePreferences();
       this.#_updateUI();
+      this.#_startOpacityTracking();
     } catch (error) {
       console.error("Failed to enable hand tracking:", error);
       this.#_statusIndicator.textContent = `Error: ${error.message}`;
@@ -203,6 +325,7 @@ export class HandTrackingUI {
     this.#_isEnabled = false;
     this.#_savePreferences();
     this.#_updateUI();
+    this.#_stopOpacityTracking();
   }
 
   /**
@@ -242,6 +365,7 @@ export class HandTrackingUI {
    * Clean up UI elements
    */
   destroy() {
+    this.#_stopOpacityTracking();
     if (this.#_container && this.#_container.parentNode) {
       this.#_container.parentNode.removeChild(this.#_container);
     }
