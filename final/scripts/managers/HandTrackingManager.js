@@ -16,6 +16,8 @@ export class HandTrackingManager {
   static #_smoothedPosition = { x: 0, y: 0 };
   static #_smoothingFactor = 0.7; // Exponential moving average factor (0-1, higher = more smoothing)
   static #_callbacks = new Set();
+  static #_landmarkCallbacks = new Set(); // Callbacks for full landmark data
+  static #_currentLandmarks = null; // Current hand landmarks in normalized coordinates
   static #_lastUpdateTime = 0;
   static #_targetFPS = 30; // Target 30 FPS for hand tracking
   static #_frameInterval = 1000 / this.#_targetFPS;
@@ -137,6 +139,9 @@ export class HandTrackingManager {
       // Use the first detected hand
       const hand = results.multiHandLandmarks[0];
       
+      // Store current landmarks
+      this.#_currentLandmarks = hand;
+      
       // Index finger tip is landmark #8
       const indexFingerTip = hand[8];
       
@@ -159,8 +164,11 @@ export class HandTrackingManager {
       
       // Notify subscribers
       this.#_notifyCallbacks();
+      this.#_notifyLandmarkCallbacks();
     } else {
       this.#_isHandDetected = false;
+      this.#_currentLandmarks = null;
+      this.#_notifyLandmarkCallbacks();
     }
   }
 
@@ -173,6 +181,19 @@ export class HandTrackingManager {
         callback(this.#_fingerPosition, this.#_isHandDetected);
       } catch (error) {
         console.error("Error in hand tracking callback:", error);
+      }
+    });
+  }
+
+  /**
+   * Notify all registered callbacks of landmark changes
+   */
+  static #_notifyLandmarkCallbacks() {
+    this.#_landmarkCallbacks.forEach((callback) => {
+      try {
+        callback(this.#_currentLandmarks, this.#_isHandDetected);
+      } catch (error) {
+        console.error("Error in landmark callback:", error);
       }
     });
   }
@@ -244,5 +265,31 @@ export class HandTrackingManager {
    */
   static GetSmoothingFactor() {
     return this.#_smoothingFactor;
+  }
+
+  /**
+   * Subscribe to hand landmark updates (full 21 landmarks)
+   * @param {Function} callback - Callback function(landmarks, isHandDetected)
+   */
+  static OnLandmarksUpdate(callback) {
+    if (typeof callback === "function") {
+      this.#_landmarkCallbacks.add(callback);
+    }
+  }
+
+  /**
+   * Unsubscribe from hand landmark updates
+   * @param {Function} callback - Callback function to remove
+   */
+  static OffLandmarksUpdate(callback) {
+    this.#_landmarkCallbacks.delete(callback);
+  }
+
+  /**
+   * Get current hand landmarks in normalized coordinates (0-1)
+   * @returns {Array|null} Array of 21 landmarks or null if no hand detected
+   */
+  static GetLandmarks() {
+    return this.#_currentLandmarks ? [...this.#_currentLandmarks] : null;
   }
 }

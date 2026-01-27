@@ -94,6 +94,7 @@ export class HandTrackingUI {
     this.#_previewContainer = document.createElement("div");
     this.#_previewContainer.className = "hand-tracking-preview";
     this.#_previewContainer.style.cssText = `
+      position: relative;
       width: 200px;
       height: 150px;
       background: rgba(0, 0, 0, 0.8);
@@ -210,6 +211,14 @@ export class HandTrackingUI {
    */
   getVideoElement() {
     return this.#_videoElement;
+  }
+
+  /**
+   * Get the video preview container element
+   * @returns {HTMLElement}
+   */
+  getPreviewContainer() {
+    return this.#_previewContainer;
   }
 
   /**

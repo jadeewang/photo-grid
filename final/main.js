@@ -8,10 +8,12 @@ import { Ticker } from "./scripts/utils/Ticker";
 import { HandTrackingUI } from "./scripts/components/HandTrackingUI";
 import { HandTrackingManager } from "./scripts/managers/HandTrackingManager";
 import { VirtualCursor } from "./scripts/components/VirtualCursor";
+import { HandTrackingOverlay } from "./scripts/components/HandTrackingOverlay";
 
 export class Main {
   static #_handTrackingUI = null;
   static #_virtualCursor = null;
+  static #_handTrackingOverlay = null;
 
   static async Init() {
     MainThree.Init();
@@ -53,6 +55,11 @@ export class Main {
     
     // Create virtual cursor for visual feedback
     this.#_virtualCursor = new VirtualCursor();
+
+    // Create hand tracking overlay (skeleton on video, particles on cursor)
+    const videoContainer = this.#_handTrackingUI.getPreviewContainer();
+    const videoElement = this.#_handTrackingUI.getVideoElement();
+    this.#_handTrackingOverlay = new HandTrackingOverlay(videoContainer, videoElement);
 
     // Subscribe to hand tracking updates to update virtual cursor
     HandTrackingManager.OnFingerMove((position, isDetected) => {
