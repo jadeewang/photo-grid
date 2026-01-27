@@ -70,12 +70,10 @@ export class Main {
       }
     });
 
-    // Auto-enable if previously enabled (from localStorage)
-    if (this.#_handTrackingUI.isEnabled()) {
-      this.#_handTrackingUI.enable().catch((error) => {
-        console.warn("Could not auto-enable hand tracking:", error);
-      });
-    }
+    // Auto-enable hand tracking by default
+    this.#_handTrackingUI.enable().catch((error) => {
+      console.warn("Could not auto-enable hand tracking:", error);
+    });
   }
 }
 

@@ -26,6 +26,9 @@ export class HandTrackingUI {
       const saved = localStorage.getItem("handTrackingEnabled");
       if (saved !== null) {
         this.#_isEnabled = saved === "true";
+      } else {
+        // Default to enabled if no preference is saved
+        this.#_isEnabled = true;
       }
       
       const previewSaved = localStorage.getItem("handTrackingShowPreview");
@@ -34,6 +37,8 @@ export class HandTrackingUI {
       }
     } catch (error) {
       console.warn("Could not load hand tracking preferences:", error);
+      // Default to enabled on error
+      this.#_isEnabled = true;
     }
   }
 

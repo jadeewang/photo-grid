@@ -155,4 +155,44 @@ export class GestureRecognizer {
     // Pointing: index extended, others curled
     return indexExtended && middleCurled && ringCurled;
   }
+
+  /**
+   * Check if thumb and index finger are both extended (pinch gesture ready)
+   * @param {Array} hand - Array of hand landmarks from MediaPipe
+   * @returns {boolean} True if both thumb and index are extended
+   */
+  static IsPinchReady(hand) {
+    if (!hand || hand.length < 21) return false;
+
+    const thumbTip = hand[this.LANDMARKS.THUMB_TIP];
+    const indexTip = hand[this.LANDMARKS.INDEX_TIP];
+    
+    // Check if thumb tip is extended (thumb is special - check if it's away from palm)
+    const thumbMCP = hand[this.LANDMARKS.THUMB_MCP];
+    const thumbExtended = thumbTip.x > thumbMCP.x || Math.abs(thumbTip.y - thumbMCP.y) < 0.1;
+    
+    // Check if index finger is extended
+    const indexExtended = this.#_isFingerExtended(
+      hand,
+      this.LANDMARKS.INDEX_TIP,
+      this.LANDMARKS.INDEX_PIP,
+      this.LANDMARKS.INDEX_MCP
+    );
+
+    return thumbExtended && indexExtended;
+  }
+
+  /**
+   * Calculate distance between thumb tip and index finger tip
+   * @param {Array} hand - Array of hand landmarks from MediaPipe
+   * @returns {number|null} Distance between tips, or null if invalid
+   */
+  static GetPinchDistance(hand) {
+    if (!hand || hand.length < 21) return null;
+
+    const thumbTip = hand[this.LANDMARKS.THUMB_TIP];
+    const indexTip = hand[this.LANDMARKS.INDEX_TIP];
+
+    return this.#_distance(thumbTip, indexTip);
+  }
 }
