@@ -81,6 +81,8 @@ export class HandTrackingUI {
       font-size: 12px;
       transition: all 0.3s ease, opacity 0.3s ease;
       opacity: 1;
+      min-width: 180px;
+      text-align: center;
     `;
 
     // Create status indicator
@@ -88,13 +90,13 @@ export class HandTrackingUI {
     this.#_statusIndicator.className = "hand-tracking-status";
     this.#_statusIndicator.textContent = "Hand tracking off";
     this.#_statusIndicator.style.cssText = `
-      padding: 8px 12px;
+      padding: 10px 20px;
       background: rgba(0, 0, 0, 0.5);
       color: white;
-      border-radius: 6px;
+      border-radius: 8px;
       font-family: ui-monospace, monospace;
-      font-size: 11px;
-      min-width: 150px;
+      font-size: 12px;
+      min-width: 180px;
       text-align: center;
       transition: background-color 0.3s ease, opacity 0.3s ease;
       opacity: 1;

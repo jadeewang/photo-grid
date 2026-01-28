@@ -195,4 +195,48 @@ export class GestureRecognizer {
 
     return this.#_distance(thumbTip, indexTip);
   }
+
+  /**
+   * Detect if hand is in a peace sign gesture (index and middle fingers extended, others curled)
+   * @param {Array} hand - Array of hand landmarks from MediaPipe
+   * @returns {boolean} True if peace sign is detected
+   */
+  static IsPeaceSign(hand) {
+    if (!hand || hand.length < 21) return false;
+
+    // Check if index finger is extended
+    const indexExtended = this.#_isFingerExtended(
+      hand,
+      this.LANDMARKS.INDEX_TIP,
+      this.LANDMARKS.INDEX_PIP,
+      this.LANDMARKS.INDEX_MCP
+    );
+
+    // Check if middle finger is extended
+    const middleExtended = this.#_isFingerExtended(
+      hand,
+      this.LANDMARKS.MIDDLE_TIP,
+      this.LANDMARKS.MIDDLE_PIP,
+      this.LANDMARKS.MIDDLE_MCP
+    );
+
+    // Check if ring finger is curled
+    const ringCurled = !this.#_isFingerExtended(
+      hand,
+      this.LANDMARKS.RING_TIP,
+      this.LANDMARKS.RING_PIP,
+      this.LANDMARKS.RING_MCP
+    );
+
+    // Check if pinky finger is curled
+    const pinkyCurled = !this.#_isFingerExtended(
+      hand,
+      this.LANDMARKS.PINKY_TIP,
+      this.LANDMARKS.PINKY_PIP,
+      this.LANDMARKS.PINKY_MCP
+    );
+
+    // Peace sign: index and middle extended, ring and pinky curled
+    return indexExtended && middleExtended && ringCurled && pinkyCurled;
+  }
 }
