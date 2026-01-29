@@ -1,6 +1,7 @@
-import { Hands } from "@mediapipe/hands";
-import { Camera } from "@mediapipe/camera_utils";
 import { CoordinateTransformer } from "../utils/CoordinateTransformer";
+
+// mediapipe packages are umd/legacy bundles; load at runtime so Hands/Camera
+// resolve correctly in all browsers (avoids "Hands is not a constructor" in Safari/Chrome)
 
 /**
  * handtrackingmanager - manages mediapipe hand tracking and provides
@@ -41,6 +42,12 @@ export class HandTrackingManager {
     }
 
     try {
+      // load mediapipe hands at runtime (avoids bundler breaking constructor)
+      const handsModule = await import("@mediapipe/hands");
+      const Hands = handsModule.Hands || handsModule.default?.Hands || (typeof globalThis !== "undefined" && globalThis.Hands);
+      if (typeof Hands !== "function") {
+        throw new Error("MediaPipe Hands could not be loaded. Try Chrome or another supported browser.");
+      }
       // initialize mediapipe hands
       this.#_hands = new Hands({
         locateFile: (file) => {
@@ -84,6 +91,12 @@ export class HandTrackingManager {
     }
 
     try {
+      // load mediapipe camera_utils at runtime (same bundler fix as Hands)
+      const cameraModule = await import("@mediapipe/camera_utils");
+      const Camera = cameraModule.Camera || cameraModule.default?.Camera || (typeof globalThis !== "undefined" && globalThis.Camera);
+      if (typeof Camera !== "function") {
+        throw new Error("MediaPipe Camera could not be loaded.");
+      }
       // initialize camera
       this.#_camera = new Camera(this.#_videoElement, {
         onFrame: async () => {
