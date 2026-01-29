@@ -1,5 +1,5 @@
 export const AssetsId = Object.freeze({
-  // Textures
+  // textures!
   TEXTURE_1: "TEXTURE_1",
   TEXTURE_2: "TEXTURE_2",
   TEXTURE_3: "TEXTURE_3",
@@ -16,6 +16,4 @@ export const AssetsId = Object.freeze({
   TEXTURE_14: "TEXTURE_14",
   TEXTURE_15: "TEXTURE_15",
   TEXTURE_16: "TEXTURE_16",
-
-  // Sounds
 });

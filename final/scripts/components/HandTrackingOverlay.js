@@ -3,8 +3,8 @@ import { CoordinateTransformer } from "../utils/CoordinateTransformer";
 import { Ticker } from "../utils/Ticker";
 
 /**
- * HandTrackingOverlay - Visual overlay for hand tracking on video preview
- * Renders green skeleton lines connecting hand landmarks on the video feed
+ * handtrackingoverlay - visual overlay for hand tracking on video preview
+ * renders green skeleton lines connecting hand landmarks on the video feed
  */
 export class HandTrackingOverlay {
   #_canvas = null;
@@ -18,44 +18,44 @@ export class HandTrackingOverlay {
   #_landmarkCallback = null;
   #_resizeObserver = null;
 
-  // Hand landmark connections (indices)
+  // hand landmark connections (indices)
   static #_CONNECTIONS = [
-    // Wrist to finger bases
-    [0, 1],   // Wrist to Thumb CMC
-    [0, 5],   // Wrist to Index MCP
-    [0, 9],   // Wrist to Middle MCP
-    [0, 13],  // Wrist to Ring MCP
-    [0, 17],  // Wrist to Pinky MCP
+    // wrist to finger bases
+    [0, 1],   // wrist to thumb cmc
+    [0, 5],   // wrist to index mcp
+    [0, 9],   // wrist to middle mcp
+    [0, 13],  // wrist to ring mcp
+    [0, 17],  // wrist to pinky mcp
     
-    // Thumb
-    [1, 2],   // Thumb CMC to MCP
-    [2, 3],   // Thumb MCP to IP
-    [3, 4],   // Thumb IP to TIP
+    // thumb
+    [1, 2],   // thumb cmc to mcp
+    [2, 3],   // thumb mcp to ip
+    [3, 4],   // thumb ip to tip
     
-    // Index finger
-    [5, 6],   // Index MCP to PIP
-    [6, 7],   // Index PIP to DIP
-    [7, 8],   // Index DIP to TIP
+    // index finger
+    [5, 6],   // index mcp to pip
+    [6, 7],   // index pip to dip
+    [7, 8],   // index dip to tip
     
-    // Middle finger
-    [9, 10],  // Middle MCP to PIP
-    [10, 11], // Middle PIP to DIP
-    [11, 12], // Middle DIP to TIP
+    // middle finger
+    [9, 10],  // middle mcp to pip
+    [10, 11], // middle pip to dip
+    [11, 12], // middle dip to tip
     
-    // Ring finger
-    [13, 14], // Ring MCP to PIP
-    [14, 15], // Ring PIP to DIP
-    [15, 16], // Ring DIP to TIP
+    // ring finger
+    [13, 14], // ring mcp to pip
+    [14, 15], // ring pip to dip
+    [15, 16], // ring dip to tip
     
-    // Pinky finger
-    [17, 18], // Pinky MCP to PIP
-    [18, 19], // Pinky PIP to DIP
-    [19, 20], // Pinky DIP to TIP
+    // pinky finger
+    [17, 18], // pinky mcp to pip
+    [18, 19], // pinky pip to dip
+    [19, 20], // pinky dip to tip
     
-    // Connections between finger bases
-    [5, 9],   // Index MCP to Middle MCP
-    [9, 13],  // Middle MCP to Ring MCP
-    [13, 17], // Ring MCP to Pinky MCP
+    // connections between finger bases
+    [5, 9],   // index mcp to middle mcp
+    [9, 13],  // middle mcp to ring mcp
+    [13, 17], // ring mcp to pinky mcp
   ];
 
   constructor(videoContainer, videoElement) {
@@ -72,7 +72,7 @@ export class HandTrackingOverlay {
       return;
     }
 
-    // Create container positioned over the video
+    // create container positioned over the video
     this.#_container = document.createElement("div");
     this.#_container.className = "hand-tracking-overlay";
     this.#_container.style.cssText = `
@@ -85,7 +85,7 @@ export class HandTrackingOverlay {
       z-index: 10;
     `;
 
-    // Create canvas matching video container size
+    // create canvas matching video container size
     this.#_canvas = document.createElement("canvas");
     this.#_updateCanvasSize();
     this.#_canvas.style.cssText = `
@@ -108,16 +108,15 @@ export class HandTrackingOverlay {
   }
 
   #_setupEventListeners() {
-    // Listen for landmark updates
+    // listen for landmark updates
     this.#_landmarkCallback = (landmarks, isDetected) => {
       this.#_currentLandmarks = landmarks;
       this.#_isVisible = isDetected && HandTrackingManager.IsActive();
     };
     HandTrackingManager.OnLandmarksUpdate(this.#_landmarkCallback);
 
-    // No need to track cursor position for video overlay
-
-    // Handle video container resize
+  
+    // handle video container resize
     if (this.#_videoContainer) {
       this.#_resizeObserver = new ResizeObserver(() => {
         this.#_updateCanvasSize();
@@ -125,7 +124,7 @@ export class HandTrackingOverlay {
       this.#_resizeObserver.observe(this.#_videoContainer);
     }
 
-    // Handle window resize
+    // handle window resize
     window.addEventListener("resize", () => {
       this.#_updateCanvasSize();
     });
@@ -141,27 +140,26 @@ export class HandTrackingOverlay {
   }
 
   #_update() {
-    // No particles in video overlay - they're handled separately if needed
+    // no particles in video overlay.. handled separately if needed
   }
 
   #_render() {
-    // Clear canvas
+    // clear canvas
     this.#_ctx.clearRect(0, 0, this.#_canvas.width, this.#_canvas.height);
 
-    // Always draw grid lines when hand tracking is active
+    // always draw grid lines when hand tracking is active!
     if (HandTrackingManager.IsActive()) {
-      // Pass hand center position if available
+      // pass hand center position, if available
       const handCenter = this.#_getHandCenter();
       this.#_drawGridLines(handCenter);
     }
 
-    // Draw skeleton on video when hand is detected
+    // draw skeleton overlay on video when hand is detected
     if (this.#_isVisible && this.#_currentLandmarks) {
       this.#_drawSkeleton();
     }
 
-    // Particles are drawn on the main screen (not on video)
-    // They're handled separately if needed
+    // particles are drawn on the main screen (not on video)
   }
 
   #_getHandCenter() {
@@ -175,9 +173,9 @@ export class HandTrackingOverlay {
     const width = rect.width;
     const height = rect.height;
 
-    // Use wrist (landmark 0) as the hand center reference
+    // use wrist (landmark 0) as the hand center reference
     const wrist = this.#_currentLandmarks[0];
-    // Flip X because video is mirrored
+    // flip x since video is mirrored
     const x = (1 - wrist.x) * width;
     const y = wrist.y * height;
 
@@ -193,36 +191,36 @@ export class HandTrackingOverlay {
     const width = rect.width;
     const height = rect.height;
 
-    // Determine grid center - use hand center if available, otherwise use screen center
+    // determine grid center - use hand center if available, otherwise use screen center
     const centerX = handCenter ? handCenter.x : width / 2;
     const centerY = handCenter ? handCenter.y : height / 2;
 
-    // Draw grid lines
-    ctx.strokeStyle = "#0080ff"; // Blue color similar to reference
+    // draw grid lines!
+    ctx.strokeStyle = "#0080ff"; // blue color similar to reference
     ctx.lineWidth = 2;
     ctx.lineCap = "round";
 
-    // Draw vertical center line (dividing left and right zones) - follows hand or centered
+    // draw vertical center line (dividing left and right zones) - follows hand or centered
     ctx.beginPath();
     ctx.moveTo(centerX, 0);
     ctx.lineTo(centerX, height);
     ctx.stroke();
 
-    // Draw horizontal center line for better grid visualization - follows hand or centered
+    // draw horizontal center line for better grid visualization - follows hand or centered
     ctx.beginPath();
     ctx.moveTo(0, centerY);
     ctx.lineTo(width, centerY);
     ctx.stroke();
 
-    // Draw quarter lines for finer grid (lighter opacity)
-    ctx.globalAlpha = 0.4; // More transparent for quarter lines
+    // draw quarter lines for finer grid (lighter opacity)
+    ctx.globalAlpha = 0.4; // more transparent for quarter lines
     ctx.lineWidth = 1;
     
-    // Calculate quarter offsets from center
+    // calculate quarter offsets from center
     const quarterOffsetX = width / 4;
     const quarterOffsetY = height / 4;
     
-    // Vertical quarter lines (relative to hand center)
+    // vertical quarter lines (relative to hand center)
     ctx.beginPath();
     ctx.moveTo(centerX - quarterOffsetX, 0);
     ctx.lineTo(centerX - quarterOffsetX, height);
@@ -230,7 +228,7 @@ export class HandTrackingOverlay {
     ctx.lineTo(centerX + quarterOffsetX, height);
     ctx.stroke();
 
-    // Horizontal quarter lines (relative to hand center)
+    // horizontal quarter lines (relative to hand center)
     ctx.beginPath();
     ctx.moveTo(0, centerY - quarterOffsetY);
     ctx.lineTo(width, centerY - quarterOffsetY);
@@ -238,7 +236,7 @@ export class HandTrackingOverlay {
     ctx.lineTo(width, centerY + quarterOffsetY);
     ctx.stroke();
 
-    // Reset alpha and line width for other drawings
+    // reset alpha and line width for other drawings
     ctx.globalAlpha = 1.0;
     ctx.lineWidth = 2;
   }
@@ -253,11 +251,11 @@ export class HandTrackingOverlay {
     const width = rect.width;
     const height = rect.height;
 
-    // Convert landmarks from normalized coordinates (0-1) to video canvas coordinates
-    // Note: MediaPipe coordinates are already in the video's coordinate space
-    // The video is mirrored (scaleX(-1)), so we need to flip X
+    // convert landmarks from normalized coordinates (0-1) to video canvas coordinates
+    // note: mediapipe coordinates are already in the video's coordinate space
+    // the video is mirrored (scalex(-1)), so we need to flip x
     const videoLandmarks = landmarks.map((landmark) => {
-      // Flip X because video is mirrored
+      // flip x since video is mirrored
       const x = (1 - landmark.x) * width;
       const y = landmark.y * height;
       return { x, y };
@@ -281,7 +279,7 @@ export class HandTrackingOverlay {
       }
     }
 
-    // Draw landmark points
+    // draw landmark points
     ctx.fillStyle = "#00ff00";
     for (const point of videoLandmarks) {
       if (point) {
@@ -303,7 +301,7 @@ export class HandTrackingOverlay {
   }
 
   /**
-   * Hide the overlay
+   * hide the overlay
    */
   hide() {
     if (this.#_container) {
@@ -312,7 +310,7 @@ export class HandTrackingOverlay {
   }
 
   /**
-   * Clean up and remove overlay
+   * clean up and remove overlay
    */
   destroy() {
     if (this.#_animationFrameId) {

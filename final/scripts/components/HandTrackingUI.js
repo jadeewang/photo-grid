@@ -1,8 +1,8 @@
 import { HandTrackingManager } from "../managers/HandTrackingManager";
 
 /**
- * HandTrackingUI - Manages UI elements for hand tracking control
- * Includes toggle button, video preview, and status indicators
+ * handtrackingui - manages ui elements for hand tracking control
+ * includes toggle button, video preview, and status indicators
  */
 export class HandTrackingUI {
   #_container = null;
@@ -27,7 +27,7 @@ export class HandTrackingUI {
       if (saved !== null) {
         this.#_isEnabled = saved === "true";
       } else {
-        // Default to enabled if no preference is saved
+        // default to enabled if no preference is saved
         this.#_isEnabled = true;
       }
       
@@ -37,7 +37,7 @@ export class HandTrackingUI {
       }
     } catch (error) {
       console.warn("Could not load hand tracking preferences:", error);
-      // Default to enabled on error
+      // default to enabled on error
       this.#_isEnabled = true;
     }
   }
@@ -52,7 +52,7 @@ export class HandTrackingUI {
   }
 
   #_createUI() {
-    // Create main container
+    // create main container
     this.#_container = document.createElement("div");
     this.#_container.className = "hand-tracking-ui";
     this.#_container.style.cssText = `
@@ -66,7 +66,7 @@ export class HandTrackingUI {
       align-items: flex-end;
     `;
 
-    // Create toggle button
+    // create toggle button
     this.#_toggleButton = document.createElement("button");
     this.#_toggleButton.className = "hand-tracking-toggle";
     this.#_toggleButton.textContent = "turn on magic mode :)";
@@ -85,7 +85,7 @@ export class HandTrackingUI {
       text-align: center;
     `;
 
-    // Create status indicator
+    // create status indicator
     this.#_statusIndicator = document.createElement("div");
     this.#_statusIndicator.className = "hand-tracking-status";
     this.#_statusIndicator.textContent = "Hand tracking off";
@@ -102,7 +102,7 @@ export class HandTrackingUI {
       opacity: 1;
     `;
 
-    // Create video preview container
+    // create video preview container
     this.#_previewContainer = document.createElement("div");
     this.#_previewContainer.className = "hand-tracking-preview";
     this.#_previewContainer.style.cssText = `
@@ -118,7 +118,7 @@ export class HandTrackingUI {
       transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
     `;
 
-    // Create video element
+    // create video element
     this.#_videoElement = document.createElement("video");
     this.#_videoElement.autoplay = true;
     this.#_videoElement.playsInline = true;
@@ -135,14 +135,14 @@ export class HandTrackingUI {
     this.#_container.appendChild(this.#_previewContainer);
     document.body.appendChild(this.#_container);
 
-    // Update initial state
+    // update initial state
     this.#_updateUI();
     
-    // If initially disabled, collapse the video player
+    // if initially disabled, collapse video player
     if (!this.#_isEnabled) {
       this.#_collapseVideoPlayer();
     } else {
-      // If initially enabled, start opacity tracking
+      // if initially enabled, start opacity tracking
       this.#_startOpacityTracking();
     }
   }
@@ -152,10 +152,10 @@ export class HandTrackingUI {
       this.toggle();
     });
 
-    // Listen for hand detection changes
+    // listen for hand detection changes!
     HandTrackingManager.OnFingerMove((position, isDetected) => {
       this.#_updateStatus(isDetected);
-      // Track virtual cursor position (tracked cursor from hand tracking)
+      // track virtual cursor position (tracked cursor from hand tracking)
       this.#_virtualCursorPosition = { x: position.x, y: position.y };
     });
   }
@@ -178,14 +178,14 @@ export class HandTrackingUI {
       this.#_toggleButton.style.background = "rgba(255, 0, 0, 0.7)";
       this.#_statusIndicator.textContent = "one sec...";
       this.#_statusIndicator.style.background = "rgba(255, 255, 0, 0.3)";
-      // Set buttons to 50% opacity
+      // set buttons to 50% opacity
       if (this.#_toggleButton) {
         this.#_toggleButton.style.opacity = "0.5";
       }
       if (this.#_statusIndicator) {
         this.#_statusIndicator.style.opacity = "0.5";
       }
-      // Show and set opacity for video player
+      // show and set opacity for video player
       this.#_showVideoPlayer();
       this.#_setOpacity(0.95);
     } else {
@@ -193,21 +193,21 @@ export class HandTrackingUI {
       this.#_toggleButton.style.background = "rgba(0, 0, 0, 0.7)";
       this.#_statusIndicator.textContent = "hand tracking off";
       this.#_statusIndicator.style.background = "rgba(0, 0, 0, 0.5)";
-      // Reset opacity to full for buttons when disabled
+      // reset opacity to full for buttons when disabled
       if (this.#_toggleButton) {
         this.#_toggleButton.style.opacity = "1.0";
       }
       if (this.#_statusIndicator) {
         this.#_statusIndicator.style.opacity = "1.0";
       }
-      // Collapse video player
+      // collapse video player
       this.#_collapseVideoPlayer();
     }
   }
 
   #_showVideoPlayer() {
     if (this.#_previewContainer) {
-      // Only show if preview is enabled
+      // only show if preview is enabled
       if (this.#_showPreview) {
         this.#_previewContainer.style.display = "block";
         this.#_previewContainer.style.height = "150px";
@@ -223,7 +223,7 @@ export class HandTrackingUI {
       this.#_previewContainer.style.height = "0";
       this.#_previewContainer.style.margin = "0";
       this.#_previewContainer.style.overflow = "hidden";
-      // Hide after transition completes
+      // hide after transition completes
       setTimeout(() => {
         if (!this.#_isEnabled && this.#_previewContainer) {
           this.#_previewContainer.style.display = "none";
@@ -233,11 +233,11 @@ export class HandTrackingUI {
   }
 
   #_setOpacity(opacity) {
-    // Apply opacity to video player only
+    // apply opacity to video player only
     if (this.#_previewContainer) {
       this.#_previewContainer.style.opacity = opacity.toString();
     }
-    // Buttons always stay at 50% opacity when enabled
+    // buttons stay at 50% opacity when enabled
     if (this.#_isEnabled) {
       if (this.#_toggleButton) {
         this.#_toggleButton.style.opacity = "0.5";
@@ -249,13 +249,13 @@ export class HandTrackingUI {
   }
 
   #_startOpacityTracking() {
-    // Check cursor position periodically
+    // check cursor position periodically!
     this.#_opacityCheckInterval = setInterval(() => {
       if (!this.#_isEnabled || !this.#_previewContainer) {
         return;
       }
 
-      // Only track opacity if video player is visible
+      // only track opacity if video player is visible
       const isVisible = this.#_previewContainer.style.display !== "none" && 
                         this.#_previewContainer.offsetHeight > 0;
       if (!isVisible) {
@@ -263,12 +263,12 @@ export class HandTrackingUI {
       }
 
       const rect = this.#_previewContainer.getBoundingClientRect();
-      // Only check virtual cursor (tracked cursor), not mouse
+      // only check virtual cursor (tracked cursor), not mouse
       const isTrackedCursorOver = this.#_isPointInRect(this.#_virtualCursorPosition, rect);
 
-      // Fade to 30% when tracked cursor is over, otherwise 95%
+      // fade to 30% when tracked cursor is over, otherwise 95% always
       this.#_setOpacity(isTrackedCursorOver ? 0.3 : 0.95);
-    }, 50); // Check every 50ms for smooth transitions
+    }, 50); // check every 50ms for smooth transitions
   }
 
   #_stopOpacityTracking() {
@@ -291,7 +291,7 @@ export class HandTrackingUI {
   }
 
   /**
-   * Toggle hand tracking on/off
+   * toggle hand tracking on/off
    */
   async toggle() {
     if (this.#_isEnabled) {
@@ -302,11 +302,11 @@ export class HandTrackingUI {
   }
 
   /**
-   * Enable hand tracking
+   * enable hand tracking
    */
   async enable() {
     try {
-      // Initialize if not already done
+      // initialize if not already done
       if (!HandTrackingManager.IsActive()) {
         await HandTrackingManager.Init(this.#_videoElement);
       }
@@ -325,7 +325,7 @@ export class HandTrackingUI {
   }
 
   /**
-   * Disable hand tracking
+   * disable hand tracking
    */
   async disable() {
     HandTrackingManager.Stop();
@@ -336,7 +336,7 @@ export class HandTrackingUI {
   }
 
   /**
-   * Get the video element for MediaPipe
+   * get the video element for mediapipe
    * @returns {HTMLVideoElement}
    */
   getVideoElement() {
@@ -344,7 +344,7 @@ export class HandTrackingUI {
   }
 
   /**
-   * Get the video preview container element
+   * get the video preview container element
    * @returns {HTMLElement}
    */
   getPreviewContainer() {
@@ -352,7 +352,7 @@ export class HandTrackingUI {
   }
 
   /**
-   * Toggle video preview visibility
+   * toggle video preview visibility
    */
   togglePreview() {
     this.#_showPreview = !this.#_showPreview;
@@ -361,7 +361,7 @@ export class HandTrackingUI {
   }
 
   /**
-   * Check if hand tracking is enabled
+   * check if hand tracking is enabled
    * @returns {boolean}
    */
   isEnabled() {
@@ -369,7 +369,7 @@ export class HandTrackingUI {
   }
 
   /**
-   * Clean up UI elements
+   * clean up ui elements
    */
   destroy() {
     this.#_stopOpacityTracking();

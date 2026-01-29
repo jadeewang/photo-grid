@@ -1,16 +1,16 @@
 /**
- * Utility class for converting MediaPipe normalized coordinates
- * to screen space and Three.js NDC (Normalized Device Coordinates)
+ * utility class for converting mediapipe normalized coordinates
+ * to screen space and Three.js ndc
  */
 export class CoordinateTransformer {
   /**
-   * Convert MediaPipe normalized coordinates (0-1) to screen space pixels
-   * @param {number} normalizedX - X coordinate from MediaPipe (0-1)
-   * @param {number} normalizedY - Y coordinate from MediaPipe (0-1)
-   * @returns {{x: number, y: number}} Screen coordinates in pixels
+   * convert mediapipe normalized coordinates (0-1) to screen space pixels
+   * @param {number} normalizedX - x coordinate from mediapipe (0-1)
+   * @param {number} normalizedY - y coordinate from mediapipe (0-1)
+   * @returns {{x: number, y: number}} screen coordinates in pixels
    */
   static NormalizedToScreen(normalizedX, normalizedY) {
-    // Mirror X-axis for natural interaction (as if looking in a mirror)
+    // mirror x-axis for natural interaction (as if looking in a mirror)
     const screenX = (1 - normalizedX) * window.innerWidth;
     const screenY = normalizedY * window.innerHeight;
     
@@ -31,10 +31,10 @@ export class CoordinateTransformer {
   }
 
   /**
-   * Convert MediaPipe normalized coordinates directly to Three.js NDC
-   * @param {number} normalizedX - X coordinate from MediaPipe (0-1)
-   * @param {number} normalizedY - Y coordinate from MediaPipe (0-1)
-   * @returns {{x: number, y: number}} NDC coordinates (-1 to 1)
+   * convert mediapipe normalized coordinates directly to Three.js ndc
+   * @param {number} normalizedX - x coordinate from mediapipe (0-1)
+   * @param {number} normalizedY - y coordinate from mediapipe (0-1)
+   * @returns {{x: number, y: number}} ndc coordinates (-1 to 1)
    */
   static NormalizedToNDC(normalizedX, normalizedY) {
     const screen = this.NormalizedToScreen(normalizedX, normalizedY);

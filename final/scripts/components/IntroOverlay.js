@@ -1,6 +1,5 @@
 /**
- * IntroOverlay - Displays intro animation sequence on first visit
- * Shows two message cards with navigation
+ * intro overlay - displays intro animation sequence on first visit
  */
 export class IntroOverlay {
   #_container = null;
@@ -10,7 +9,7 @@ export class IntroOverlay {
   #_cards = [];
   #_onComplete = null;
 
-  // Message content
+  // message content section
   static MESSAGES = [
     {
       text: "welcome to Prague!",
@@ -33,7 +32,7 @@ export class IntroOverlay {
   }
 
   #_createOverlay() {
-    // Create background shading layer
+    // create background shading layer
     this.#_backgroundShade = document.createElement("div");
     this.#_backgroundShade.className = "intro-background-shade";
     this.#_backgroundShade.style.cssText = `
@@ -49,7 +48,7 @@ export class IntroOverlay {
     `;
     document.body.appendChild(this.#_backgroundShade);
 
-    // Create main overlay container (centered card area)
+    // create main overlay container (centered card area)
     this.#_overlay = document.createElement("div");
     this.#_overlay.className = "intro-overlay";
     this.#_overlay.style.cssText = `
@@ -71,7 +70,7 @@ export class IntroOverlay {
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     `;
 
-    // Create cards container
+    // create cards container
     this.#_container = document.createElement("div");
     this.#_container.className = "intro-cards-container";
     this.#_container.style.cssText = `
@@ -81,7 +80,7 @@ export class IntroOverlay {
       padding: 0;
     `;
 
-    // Create all cards
+    // create all cards
     IntroOverlay.MESSAGES.forEach((message, index) => {
       const card = this.#_createCard(message, index);
       this.#_cards.push(card);
@@ -91,7 +90,7 @@ export class IntroOverlay {
     this.#_overlay.appendChild(this.#_container);
     document.body.appendChild(this.#_overlay);
 
-    // Show first card
+    // show first card
     this.#_showCard(0);
   }
 
@@ -119,7 +118,7 @@ export class IntroOverlay {
       box-sizing: border-box;
     `;
 
-    // Create text content
+    // create text content
     const textContainer = document.createElement("div");
     textContainer.style.cssText = `
       font-family: ui-monospace, monospace;
@@ -150,7 +149,7 @@ export class IntroOverlay {
       textContainer.appendChild(title);
     }
 
-    // Add secondary text that fades in after 2 seconds (for first card)
+    // add secondary text that fades in after 2 seconds (for first card)
     if (message.secondaryText && index === 0) {
       const secondaryText = document.createElement("div");
       secondaryText.textContent = message.secondaryText;
@@ -167,7 +166,7 @@ export class IntroOverlay {
       `;
       textContainer.appendChild(secondaryText);
       
-      // Store reference for delayed fade-in
+      // store reference for delayed fade-in
       card._secondaryTextElement = secondaryText;
     }
 
@@ -199,7 +198,7 @@ export class IntroOverlay {
 
     card.appendChild(textContainer);
 
-    // Create navigation buttons
+    // create navigation buttons
     const navContainer = document.createElement("div");
     navContainer.style.cssText = `
       display: flex;
@@ -211,24 +210,24 @@ export class IntroOverlay {
       width: 100%;
     `;
 
-    // Back button (only show on card 2)
+    // back button (only show on card 2)
     if (index > 0) {
       const backButton = this.#_createNavButton("←", () => this.#_goToPrevious(), false);
       navContainer.appendChild(backButton);
     } else {
-      // Spacer for first card
+      // spacer for first card
       const spacer = document.createElement("div");
       spacer.style.cssText = `width: 60px;`;
       navContainer.appendChild(spacer);
     }
 
-    // Forward or "Got it!" button
+    // forward or "got it!" button
     if (index === IntroOverlay.MESSAGES.length - 1) {
-      // Final card: "Got it!" button
+      // final card: "got it!" button
       const gotItButton = this.#_createNavButton("Got it!", () => this.#_complete(), true);
       navContainer.appendChild(gotItButton);
     } else {
-      // Forward button
+      // forward button
       const forwardButton = this.#_createNavButton("→", () => this.#_goToNext(), false);
       navContainer.appendChild(forwardButton);
     }
@@ -274,24 +273,24 @@ export class IntroOverlay {
   }
 
   #_showCard(index) {
-    // Hide all cards
+    // hide all cards
     this.#_cards.forEach((card, i) => {
       if (i === index) {
         card.style.opacity = "1";
         card.style.pointerEvents = "auto";
         card.style.transform = "translateY(0)";
         
-        // If this is the first card, trigger secondary text fade-in after 2 seconds
+        // this is the first card, trigger secondary text fade-in after 2 seconds
         if (i === 0 && card._secondaryTextElement) {
-          // Reset opacity first
+          // reset opacity
           card._secondaryTextElement.style.opacity = "0";
           
-          // Clear any existing timeout
+          // clear any existing timeout
           if (card._fadeInTimeout) {
             clearTimeout(card._fadeInTimeout);
           }
           
-          // Fade in after 2 seconds
+          // fade in after 2 seconds
           card._fadeInTimeout = setTimeout(() => {
             if (card._secondaryTextElement) {
               card._secondaryTextElement.style.opacity = "1";
@@ -303,12 +302,12 @@ export class IntroOverlay {
         card.style.pointerEvents = "none";
         card.style.transform = "translateY(20px)";
         
-        // Reset secondary text opacity when hiding
+        // reset secondary text opacity when hiding
         if (card._secondaryTextElement) {
           card._secondaryTextElement.style.opacity = "0";
         }
         
-        // Clear timeout if card is hidden
+        // clear timeout if card is hidden
         if (card._fadeInTimeout) {
           clearTimeout(card._fadeInTimeout);
           card._fadeInTimeout = null;
@@ -332,7 +331,7 @@ export class IntroOverlay {
   }
 
   #_complete() {
-    // Fade out overlay and background shade
+    // fade out overlay and background shade!
     this.#_overlay.style.opacity = "0";
     if (this.#_backgroundShade) {
       this.#_backgroundShade.style.opacity = "0";
@@ -349,11 +348,11 @@ export class IntroOverlay {
       if (this.#_onComplete) {
         this.#_onComplete();
       }
-    }, 800); // Match transition duration
+    }, 800); // match transition duration
   }
 
   /**
-   * Check if intro should be shown
+   * check if intro should be shown
    * @returns {boolean}
    */
   static ShouldShowIntro() {
@@ -361,13 +360,13 @@ export class IntroOverlay {
       const completed = localStorage.getItem("introCompleted");
       return completed !== "true";
     } catch (error) {
-      // If localStorage is not available, show intro
+      // if localstorage is not available, show intro
       return true;
     }
   }
 
   /**
-   * Reset intro (for testing purposes)
+   * reset intro (for testing, TBD if need on real refresh)
    */
   static ResetIntro() {
     try {

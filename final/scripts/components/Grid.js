@@ -14,9 +14,9 @@ export class Grid extends ExtendedObject3D {
   #_interactionsEnabled = false;
   #_handNotDetectedStartTime = null;
   #_handNotDetectedDuration = 2000; // 2 seconds in milliseconds
-  #_mouseEnabled = true; // Start with mouse enabled
+  #_mouseEnabled = true; // start with mouse enabled
 
-  // Pinch zoom state
+  // pinch zoom state
   #_peaceSignDetectionStartTime = null;
   #_peaceSignDetectionDuration = 2000; // 2 seconds in milliseconds
   #_openPalmDetectionStartTime = null;
@@ -24,24 +24,24 @@ export class Grid extends ExtendedObject3D {
   #_isZoomEnabled = false;
   #_targetZoom = 1.0; // 1.0 = full grid, 1.5 = 150% zoom
   #_currentZoom = 1.0;
-  #_previousZoom = 1.0; // Track previous zoom for smooth transitions
-  #_minPinchDistance = 0.02; // Minimum distance when pinched (fingers together)
-  #_maxPinchDistance = 0.15; // Maximum distance when expanded (fingers apart)
-  #_zoomCenter = new Vector2(); // Point to zoom towards (in NDC coordinates)
+  #_previousZoom = 1.0; // track previous zoom for smooth transitions
+  #_minPinchDistance = 0.02; // minimum distance when pinched (fingers together)
+  #_maxPinchDistance = 0.15; // maximum distance when expanded (fingers apart)
+  #_zoomCenter = new Vector2(); // point to zoom towards (in coordinates)
 
   constructor() {
     super();
 
     Card.SetScale();
     this.#_createCards();
-    // Don't set up listeners until intro is dismissed
+    // don't set up listeners until intro is dismissed
     // this.#_setListeners();
     // this.#_setupHandTracking();
     // this.#_setupPinchZoom();
   }
 
   /**
-   * Enable interactions (called after intro overlay is dismissed)
+   * enable interactions! (called after intro overlay is dismissed)
    */
   enableInteractions() {
     if (!this.#_interactionsEnabled) {
@@ -58,13 +58,13 @@ export class Grid extends ExtendedObject3D {
   }
 
   #_setupHandTracking() {
-    // Subscribe to hand tracking updates
+    // subscribe to hand tracking updates!
     HandTrackingManager.OnFingerMove((position, isDetected) => {
       if (!this.#_interactionsEnabled) {
         return;
       }
 
-      // If hand tracking is not active at all, enable mouse immediately
+      // if hand tracking is not active at all, enable mouse immediately!
       if (!HandTrackingManager.IsActive()) {
         this.#_mouseEnabled = true;
         this.#_handNotDetectedStartTime = null;
@@ -73,22 +73,22 @@ export class Grid extends ExtendedObject3D {
       }
 
       if (isDetected) {
-        // Hand detected - disable mouse immediately
+        // hand detected - disable mouse immediately!!! please
         this.#_mouseEnabled = false;
         this.#_handNotDetectedStartTime = null;
         
-        // Convert finger position to NDC coordinates for Three.js
+        // convert finger position to ndc coordinates for Three.js
         const ndcPos = HandTrackingManager.GetFingerPositionNDC();
         this.#_targetMousePosition.set(ndcPos.x, ndcPos.y);
         this.#_isUsingHandTracking = true;
       } else {
-        // Hand not detected but hand tracking is active - start timer
+        // hand not detected but hand tracking is active - start timer
         if (this.#_handNotDetectedStartTime === null) {
           this.#_handNotDetectedStartTime = performance.now();
         } else {
           const elapsed = performance.now() - this.#_handNotDetectedStartTime;
           
-          // Enable mouse after 2 seconds of no hand detection
+          // enable mouse after 2 seconds of no hand detection
           if (elapsed >= this.#_handNotDetectedDuration) {
             this.#_mouseEnabled = true;
           }
@@ -100,92 +100,92 @@ export class Grid extends ExtendedObject3D {
   }
 
   #_setupPinchZoom() {
-    // Subscribe to landmark updates for gesture detection
+    // subscribe to landmark updates for gesture detection
     HandTrackingManager.OnLandmarksUpdate((landmarks, isDetected) => {
       if (!this.#_interactionsEnabled) {
         return;
       }
 
       if (!isDetected || !HandTrackingManager.IsActive()) {
-        // Reset all detection timers if hand is lost
+        // reset all detection timers if hand is lost
         this.#_peaceSignDetectionStartTime = null;
         this.#_openPalmDetectionStartTime = null;
         this.#_isZoomEnabled = false;
         this.#_targetZoom = 1.0;
-        this.#_zoomCenter.set(0, 0); // Reset zoom center
+        this.#_zoomCenter.set(0, 0); // reset zoom center
         return;
       }
 
-      // Check for open palm gesture to reset zoom
+      // check for open palm gesture to reset zoom
       const isOpenPalm = GestureRecognizer.IsOpenHand(landmarks);
       
       if (isOpenPalm) {
-        // Start or continue open palm detection timer
+        // start or continue open palm detection timer!
         if (this.#_openPalmDetectionStartTime === null) {
           this.#_openPalmDetectionStartTime = performance.now();
         } else {
           const elapsed = performance.now() - this.#_openPalmDetectionStartTime;
           
-          // Disable zoom after 3 seconds of continuous open palm
+          // disable zoom after 3 seconds of continuous open palm!
           if (elapsed >= this.#_openPalmDetectionDuration) {
             this.#_isZoomEnabled = false;
             this.#_targetZoom = 1.0;
-            this.#_zoomCenter.set(0, 0); // Reset zoom center
-            this.#_openPalmDetectionStartTime = null; // Reset timer
-            this.#_peaceSignDetectionStartTime = null; // Reset peace sign timer so user needs to reactivate
+            this.#_zoomCenter.set(0, 0); // reset zoom center
+            this.#_openPalmDetectionStartTime = null; // reset timer
+            this.#_peaceSignDetectionStartTime = null; // reset peace sign timer so user needs to reactivate
             console.log('Zoom disabled after 3 seconds of open palm detection');
-            return; // Exit early to prevent other gesture checks
+            return; // exit early to prevent other gesture checks
           }
         }
       } else {
-        // Reset open palm detection if gesture is broken
+        // reset open palm detection if gesture is broken
         this.#_openPalmDetectionStartTime = null;
       }
 
-      // If zoom is already enabled, check for pinch gesture
+      // if zoom is already enabled, check for pinch gesture
       if (this.#_isZoomEnabled) {
-        // Update zoom center to current cursor position (follows cursor)
+        // update zoom center to current cursor position (follows cursor)
         this.#_zoomCenter.copy(Grid.MousePosition);
         
         const pinchDistance = GestureRecognizer.GetPinchDistance(landmarks);
         
         if (pinchDistance !== null) {
-          // Map pinch distance to zoom level
-          // Pinched (small distance) = zoom out to 1.0
-          // Expanded (large distance) = zoom in to 1.5
+          // map pinch distance to zoom level!
+          // pinched (small distance) = zoom out to 1.0!
+          // expanded (large distance) = zoom in to 1.5!
           const normalizedDistance = Math.max(0, Math.min(1, 
             (pinchDistance - this.#_minPinchDistance) / 
             (this.#_maxPinchDistance - this.#_minPinchDistance)
           ));
           
-          // Invert: small distance (pinched) = 1.0, large distance (expanded) = 1.5
-          this.#_targetZoom = 1.0 + (normalizedDistance * 0.5); // Range: 1.0 to 1.5
+          // invert: small distance (pinched) = 1.0, large distance (expanded) = 1.5
+          this.#_targetZoom = 1.0 + (normalizedDistance * 0.5); // range: 1.0 to 1.5
         }
-        return; // Skip fist detection once zoom is enabled
+        return; // skip fist detection once zoom is enabled
       }
 
-      // Check for peace sign gesture to activate zoom
+      // check for peace sign gesture to activate zoom!
       const isPeaceSign = GestureRecognizer.IsPeaceSign(landmarks);
       
       if (isPeaceSign) {
-        // Start or continue peace sign detection timer
+        // start or continue peace sign detection timer!
         if (this.#_peaceSignDetectionStartTime === null) {
           this.#_peaceSignDetectionStartTime = performance.now();
         } else {
           const elapsed = performance.now() - this.#_peaceSignDetectionStartTime;
           
-          // Enable zoom after 2 seconds of continuous peace sign
+          // enable zoom after 2 seconds of continuous peace sign
           if (elapsed >= this.#_peaceSignDetectionDuration) {
             this.#_isZoomEnabled = true;
-            this.#_peaceSignDetectionStartTime = null; // Reset timer
+            this.#_peaceSignDetectionStartTime = null; // reset timer
             console.log('Pinch zoom enabled after 2 seconds of peace sign detection');
           }
         }
       } else {
-        // Reset peace sign detection if gesture is broken before 2 seconds
+        // reset peace sign detection if gesture is broken before 2 seconds
         this.#_peaceSignDetectionStartTime = null;
         this.#_targetZoom = 1.0;
-        this.#_zoomCenter.set(0, 0); // Reset zoom center
+        this.#_zoomCenter.set(0, 0); // reset zoom center
       }
     });
   }
@@ -200,24 +200,24 @@ export class Grid extends ExtendedObject3D {
   }
 
   #_updateMousePos = (event) => {
-    // Don't process if interactions are not enabled
+    // don't process if interactions are not enabled
     if (!this.#_interactionsEnabled) {
       return;
     }
 
-    // If hand tracking is not active (magic mode is OFF), enable mouse immediately
+    // if hand tracking is not active (magic mode is off), enable mouse immediately
     if (!HandTrackingManager.IsActive()) {
       this.#_mouseEnabled = true;
       this.#_handNotDetectedStartTime = null;
       this.#_isUsingHandTracking = false;
     }
 
-    // Don't process mouse if mouse is disabled (hand tracking was recently active)
+    // don't process mouse if mouse is disabled (hand tracking was recently active)
     if (!this.#_mouseEnabled) {
       return;
     }
 
-    // Don't process if hand is currently detected
+    // don't process if hand is currently detected
     if (HandTrackingManager.IsHandDetected() && HandTrackingManager.IsActive()) {
       return;
     }
@@ -229,7 +229,7 @@ export class Grid extends ExtendedObject3D {
     const halfW = 0.5 * window.innerWidth;
     const halfH = 0.5 * window.innerHeight;
 
-    // our position, normalized on a [-1, 1] range.
+    // our position, normalized on a [-1, 1] range
     const x = (clientX - halfW) / window.innerWidth * 2
     const y = -(clientY - halfH) / window.innerHeight * 2
 
@@ -254,23 +254,23 @@ export class Grid extends ExtendedObject3D {
   }
 
   #_updateZoom(dt) {
-    // Smoothly interpolate zoom level
+    // smoothly interpolate zoom level
     const zoomLerpFactor = 1 - Math.pow(0.05, dt);
     this.#_previousZoom = this.#_currentZoom;
     this.#_currentZoom += (this.#_targetZoom - this.#_currentZoom) * zoomLerpFactor;
     
-    // Apply zoom to grid scale
+    // apply zoom to grid scale
     this.scale.setScalar(this.#_currentZoom);
     
-    // Adjust position to zoom towards cursor (keep cursor point fixed)
-    // When zooming in, we need to translate the grid so the cursor point stays in place
-    // Formula: offset = centerPoint * (1 - zoom)
-    // When zoom = 1.0, offset = 0 (no translation)
-    // When zoom > 1.0, we translate to keep the cursor point fixed
+    // adjust position to zoom towards cursor (keep cursor point fixed)
+    // when zooming in, we need to translate the grid so the cursor point stays in place
+    // formula: offset = centerpoint * (1 - zoom)
+    // when zoom = 1.0, offset = 0 (no translation)
+    // when zoom > 1.0, translate to keep the cursor point fixed
     const offsetX = this.#_zoomCenter.x * (1 - this.#_currentZoom);
     const offsetY = this.#_zoomCenter.y * (1 - this.#_currentZoom);
     
-    // Smoothly interpolate position
+    // smoothly interpolate position
     const positionLerpFactor = 1 - Math.pow(0.1, dt);
     this.position.x += (offsetX - this.position.x) * positionLerpFactor;
     this.position.y += (offsetY - this.position.y) * positionLerpFactor;

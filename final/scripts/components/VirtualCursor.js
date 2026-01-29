@@ -1,6 +1,6 @@
 /**
- * VirtualCursor - Visual feedback element that follows finger position
- * Provides visual indication of where the hand tracking is pointing
+ * virtualcursor - visual feedback element that follows finger position
+ * provides visual indication of where the hand tracking is pointing
  */
 export class VirtualCursor {
   #_element = null;
@@ -31,9 +31,9 @@ export class VirtualCursor {
   }
 
   /**
-   * Update cursor position
-   * @param {number} x - X position in screen coordinates
-   * @param {number} y - Y position in screen coordinates
+   * update cursor position!
+   * @param {number} x - x position in screen coordinates
+   * @param {number} y - y position in screen coordinates
    */
   update(x, y) {
     if (!this.#_element) return;
@@ -47,7 +47,7 @@ export class VirtualCursor {
   }
 
   /**
-   * Show the cursor
+   * show the cursor
    */
   show() {
     if (this.#_element) {
@@ -57,7 +57,7 @@ export class VirtualCursor {
   }
 
   /**
-   * Hide the cursor
+   * hide the cursor
    */
   hide() {
     if (this.#_element) {
@@ -67,7 +67,7 @@ export class VirtualCursor {
   }
 
   /**
-   * Remove the cursor element
+   * remove the cursor element
    */
   destroy() {
     if (this.#_element && this.#_element.parentNode) {

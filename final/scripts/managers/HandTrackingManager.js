@@ -3,7 +3,7 @@ import { Camera } from "@mediapipe/camera_utils";
 import { CoordinateTransformer } from "../utils/CoordinateTransformer";
 
 /**
- * HandTrackingManager - Manages MediaPipe hand tracking and provides
+ * handtrackingmanager - manages mediapipe hand tracking and provides
  * finger position data for the photo grid interaction
  */
 export class HandTrackingManager {
@@ -14,17 +14,17 @@ export class HandTrackingManager {
   static #_isHandDetected = false;
   static #_fingerPosition = { x: 0, y: 0 };
   static #_smoothedPosition = { x: 0, y: 0 };
-  static #_smoothingFactor = 0.7; // Exponential moving average factor (0-1, higher = more smoothing)
+  static #_smoothingFactor = 0.7; // exponential moving average factor (0-1, higher = more smoothing)
   static #_callbacks = new Set();
-  static #_landmarkCallbacks = new Set(); // Callbacks for full landmark data
-  static #_currentLandmarks = null; // Current hand landmarks in normalized coordinates
+  static #_landmarkCallbacks = new Set(); // callbacks for full landmark data
+  static #_currentLandmarks = null; // current hand landmarks in normalized coordinates
   static #_lastUpdateTime = 0;
-  static #_targetFPS = 30; // Target 30 FPS for hand tracking
+  static #_targetFPS = 30; // target 30 fps for hand tracking
   static #_frameInterval = 1000 / this.#_targetFPS;
 
   /**
-   * Initialize MediaPipe Hands and prepare for tracking
-   * @param {HTMLVideoElement} videoElement - Video element for webcam feed
+   * initialize mediapipe hands and prepare for tracking
+   * @param {HTMLVideoElement} videoElement - video element for webcam feed
    * @returns {Promise<void>}
    */
   static async Init(videoElement) {
@@ -34,29 +34,30 @@ export class HandTrackingManager {
 
     this.#_videoElement = videoElement;
 
-    // Check browser compatibility
+    // check browser compatibility
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       console.warn("getUserMedia is not supported. Hand tracking will be disabled.");
       return;
     }
 
     try {
-      // Initialize MediaPipe Hands
+      // initialize mediapipe hands
       this.#_hands = new Hands({
         locateFile: (file) => {
           return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
         },
       });
 
-      // Configure MediaPipe Hands
+      // configure mediapipe hands
+    
       this.#_hands.setOptions({
-        maxNumHands: 1, // Use only the first detected hand
+        maxNumHands: 1, // use only the first detected hand
         modelComplexity: 1,
         minDetectionConfidence: 0.5,
         minTrackingConfidence: 0.5,
       });
 
-      // Set up results callback
+      // set up results callback
       this.#_hands.onResults((results) => {
         this.#_onHandResults(results);
       });
@@ -69,7 +70,7 @@ export class HandTrackingManager {
   }
 
   /**
-   * Start hand tracking with webcam
+   * start hand tracking with webcam
    * @returns {Promise<void>}
    */
   static async Start() {
@@ -83,11 +84,11 @@ export class HandTrackingManager {
     }
 
     try {
-      // Initialize camera
+      // initialize camera
       this.#_camera = new Camera(this.#_videoElement, {
         onFrame: async () => {
           const now = performance.now();
-          // Throttle to target FPS
+          // throttle to target fps
           if (now - this.#_lastUpdateTime >= this.#_frameInterval) {
             await this.#_hands.send({ image: this.#_videoElement });
             this.#_lastUpdateTime = now;
@@ -110,7 +111,7 @@ export class HandTrackingManager {
   }
 
   /**
-   * Stop hand tracking
+   * stop hand tracking
    */
   static Stop() {
     if (!this.#_isActive) {
@@ -131,27 +132,27 @@ export class HandTrackingManager {
   }
 
   /**
-   * Handle MediaPipe hand detection results
-   * @param {Object} results - MediaPipe results object
+   * handle mediapipe hand detection results
+   * @param {Object} results - mediapipe results object
    */
   static #_onHandResults(results) {
     if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-      // Use the first detected hand
+      // use the first detected hand
       const hand = results.multiHandLandmarks[0];
       
-      // Store current landmarks
+      // store current landmarks
       this.#_currentLandmarks = hand;
       
-      // Index finger tip is landmark #8
+      // index finger tip is landmark #8
       const indexFingerTip = hand[8];
       
-      // Convert normalized coordinates to screen space
+      // convert normalized coordinates to screen space
       const screenPos = CoordinateTransformer.NormalizedToScreen(
         indexFingerTip.x,
         indexFingerTip.y
       );
       
-      // Apply exponential moving average smoothing
+      // apply exponential moving average smoothing
       this.#_smoothedPosition.x = 
         this.#_smoothedPosition.x * this.#_smoothingFactor + 
         screenPos.x * (1 - this.#_smoothingFactor);
@@ -162,7 +163,7 @@ export class HandTrackingManager {
       this.#_fingerPosition = { ...this.#_smoothedPosition };
       this.#_isHandDetected = true;
       
-      // Notify subscribers
+      // notify subscribers
       this.#_notifyCallbacks();
       this.#_notifyLandmarkCallbacks();
     } else {
@@ -173,7 +174,7 @@ export class HandTrackingManager {
   }
 
   /**
-   * Notify all registered callbacks of finger position changes
+   * notify all registered callbacks of finger position changes
    */
   static #_notifyCallbacks() {
     this.#_callbacks.forEach((callback) => {
@@ -199,8 +200,8 @@ export class HandTrackingManager {
   }
 
   /**
-   * Subscribe to finger position updates
-   * @param {Function} callback - Callback function(position, isHandDetected)
+   * subscribe to finger position updates
+   * @param {Function} callback - callback function(position, ishanddetected)
    */
   static OnFingerMove(callback) {
     if (typeof callback === "function") {
@@ -209,8 +210,8 @@ export class HandTrackingManager {
   }
 
   /**
-   * Unsubscribe from finger position updates
-   * @param {Function} callback - Callback function to remove
+   * unsubscribe from finger position updates
+   * @param {Function} callback - callback function to remove
    */
   static OffFingerMove(callback) {
     this.#_callbacks.delete(callback);
@@ -225,8 +226,8 @@ export class HandTrackingManager {
   }
 
   /**
-   * Get current finger position in Three.js NDC coordinates
-   * @returns {{x: number, y: number}} Finger position in NDC (-1 to 1)
+   * get current finger position in three.js ndc coordinates
+   * @returns {{x: number, y: number}} finger position in ndc (-1 to 1)
    */
   static GetFingerPositionNDC() {
     return CoordinateTransformer.ScreenToNDC(
@@ -244,7 +245,7 @@ export class HandTrackingManager {
   }
 
   /**
-   * Check if hand tracking is active
+   * check if hand tracking is active
    * @returns {boolean}
    */
   static IsActive() {
@@ -260,7 +261,7 @@ export class HandTrackingManager {
   }
 
   /**
-   * Get current smoothing factor
+   * get current smoothing factor
    * @returns {number}
    */
   static GetSmoothingFactor() {
@@ -268,8 +269,8 @@ export class HandTrackingManager {
   }
 
   /**
-   * Subscribe to hand landmark updates (full 21 landmarks)
-   * @param {Function} callback - Callback function(landmarks, isHandDetected)
+   * subscribe to hand landmark updates (full 21 landmarks)
+   * @param {Function} callback - callback function(landmarks, ishanddetected)
    */
   static OnLandmarksUpdate(callback) {
     if (typeof callback === "function") {
@@ -286,8 +287,8 @@ export class HandTrackingManager {
   }
 
   /**
-   * Get current hand landmarks in normalized coordinates (0-1)
-   * @returns {Array|null} Array of 21 landmarks or null if no hand detected
+   * get current hand landmarks in normalized coordinates (0-1)
+   * @returns {Array|null} array of 21 landmarks or null if no hand detected
    */
   static GetLandmarks() {
     return this.#_currentLandmarks ? [...this.#_currentLandmarks] : null;

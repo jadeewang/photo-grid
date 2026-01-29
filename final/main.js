@@ -18,16 +18,14 @@ export class Main {
   static #_grid = null;
 
   static async Init() {
-    // Always initialize the grid first so it's visible (blurred) during intro
     MainThree.Init();
     Ticker.Start();
 
     await this.#_LoadAssets();
     this.#_CreateScene();
 
-    // Always show intro overlay on top of the grid
+    // always show intro overlay on top of the grid!
     new IntroOverlay(() => {
-      // Enable grid interactions and initialize hand tracking after intro completes
       if (this.#_grid) {
         this.#_grid.enableInteractions();
       }
@@ -36,11 +34,11 @@ export class Main {
   }
 
   static async #_LoadAssets() {
-    // To use your own photos:
-    // 1. Place your image files in the public/textures/ folder
-    // 2. Supported formats: .jpg, .jpeg, .png, .webp
-    // 3. Update the paths below to match your image filenames
-    // 4. You can use any number of images (1-16 or more)
+    // to use your own photos:
+    // 1. place your image files in the public/textures/ folder
+    // 2. supported formats: .jpg, .jpeg, .png, .webp
+    // 3. update the paths below to match your image filenames
+    // 4. you can use any number of images (1-16 or more)
     
     AssetsManager.AddTexture(AssetsId.TEXTURE_1, "textures/img1.webp");
     AssetsManager.AddTexture(AssetsId.TEXTURE_2, "textures/img2.webp");
@@ -68,18 +66,18 @@ export class Main {
   }
 
   static #_InitHandTracking() {
-    // Create hand tracking UI (includes video element)
+    // create hand tracking ui (includes video element)
     this.#_handTrackingUI = new HandTrackingUI();
     
-    // Create virtual cursor for visual feedback
+    // create virtual cursor for visual feedback
     this.#_virtualCursor = new VirtualCursor();
 
-    // Create hand tracking overlay (skeleton on video, particles on cursor)
+    // create hand tracking overlay (skeleton on video, particles on cursor)
     const videoContainer = this.#_handTrackingUI.getPreviewContainer();
     const videoElement = this.#_handTrackingUI.getVideoElement();
     this.#_handTrackingOverlay = new HandTrackingOverlay(videoContainer, videoElement);
 
-    // Subscribe to hand tracking updates to update virtual cursor
+    // subscribe to hand tracking updates to update virtual cursor
     HandTrackingManager.OnFingerMove((position, isDetected) => {
       if (isDetected && HandTrackingManager.IsActive()) {
         this.#_virtualCursor.update(position.x, position.y);
